@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examiner Portal | Digital Forensics Integrity Verification System</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="/css/style.css" />
+
+  <!-- Early Theme Initializer to prevent flicker -->
+  <script>
+    (function() {
+      var savedTheme = localStorage.getItem('forensics_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 50% 10%, #0e1d3e 0%, #060b18 75%);
+      padding: 32px 16px;
+      position: relative;
+      overflow-x: hidden;
+      font-family: var(--font-main, 'Inter', sans-serif);
+      color: var(--text-primary, #F1F5F9);
+    }
+
+    /* Cyber forensic grid overlay */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        linear-gradient(rgba(58, 134, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(58, 134, 255, 0.035) 1px, transparent 1px);
+      background-size: 36px 36px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Ambient glowing background elements */
+    .glow-orb {
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(58, 134, 255, 0.12) 0%, rgba(131, 56, 236, 0.04) 50%, transparent 70%);
+      filter: blur(50px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-orb-1 { top: -100px; left: calc(50% - 250px); }
+    .glow-orb-2 { bottom: -120px; right: calc(50% - 260px); }
+
+    .auth-wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .login-container {
+      background: rgba(13, 23, 48, 0.94);
+      border: 1px solid rgba(64, 93, 148, 0.45);
+      border-radius: 20px;
+      padding: 38px 34px;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 35px rgba(58, 134, 255, 0.12);
+      transition: all 0.3s ease;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      background: rgba(58, 134, 255, 0.12);
+      border: 1px solid rgba(58, 134, 255, 0.35);
+      border-radius: 999px;
+      color: var(--accent-cyan, #48CAE4);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .field-group {
+      margin-bottom: 20px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #E2E8F0;
+      margin-bottom: 7px;
+      letter-spacing: 0.2px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      width: 18px;
+      height: 18px;
+      color: var(--text-muted, #64748B);
+      pointer-events: none;
+      transition: color 0.2s ease;
+    }
+
+    .custom-input {
+      width: 100%;
+      height: 46px;
+      background: rgba(7, 13, 30, 0.65);
+      border: 1px solid rgba(64, 93, 148, 0.4);
+      border-radius: 10px;
+      padding: 0 14px 0 42px;
+      font-size: 13.5px;
+      color: #FFFFFF;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    .custom-input:focus {
+      border-color: var(--accent-blue, #3A86FF);
+      background: rgba(7, 13, 30, 0.9);
+      box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
+    }
+
+    .custom-input::placeholder {
+      color: #556987;
+      font-size: 13px;
+    }
+
+    .input-wrapper:focus-within .input-icon {
+      color: var(--accent-cyan, #48CAE4);
+    }
+
+    .pwd-toggle-btn {
+      position: absolute;
+      right: 12px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted, #64748B);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s ease;
+    }
+
+    .pwd-toggle-btn:hover {
+      color: var(--accent-cyan, #48CAE4);
+    }
+
+    .submit-btn {
+      width: 100%;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      color: #FFFFFF;
+      font-family: inherit;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #3A86FF 0%, #2563EB 100%);
+      box-shadow: 0 4px 16px rgba(58, 134, 255, 0.35);
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(135deg, #4A93FF 0%, #1D4ED8 100%);
+      box-shadow: 0 6px 20px rgba(58, 134, 255, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .form-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      font-size: 12px;
+      color: var(--text-secondary, #94A3B8);
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      accent-color: var(--accent-blue, #3A86FF);
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+    }
+
+    .admin-notice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(58, 134, 255, 0.08);
+      border: 1px solid rgba(58, 134, 255, 0.25);
+      border-radius: 8px;
+      font-size: 11.5px;
+      color: #94A3B8;
+      line-height: 1.4;
+      margin-top: 22px;
+      text-align: left;
+    }
+
+    .admin-notice svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: var(--accent-cyan, #48CAE4);
+    }
+
+    .system-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(64, 93, 148, 0.25);
+    }
+
+    .sys-pill {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(64, 93, 148, 0.25);
+      color: var(--text-muted, #64748B);
+      font-family: var(--font-mono, monospace);
+    }
+
+    .portal-info-footer {
+      font-size: 11.5px;
+      text-align: center;
+      color: var(--text-muted, #64748B);
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+
+    /* Toast styling */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      padding: 12px 18px;
+      border-radius: 10px;
+      background: #0D1730;
+      color: #FFFFFF;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(64, 93, 148, 0.4);
+      animation: slideIn 0.3s ease;
+      max-width: 360px;
+    }
+
+    .toast.success {
+      border-color: #10B981;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+    }
+
+    .toast.error {
+      border-color: #EF4444;
+      background: rgba(239, 68, 68, 0.15);
+      color: #F87171;
+    }
+
+    .toast.warning {
+      border-color: #F59E0B;
+      background: rgba(245, 158, 11, 0.15);
+      color: #FBBF24;
+    }
+
+    .toast.info {
+      border-color: #3A86FF;
+      background: rgba(58, 134, 255, 0.15);
+      color: #60A5FA;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    /* Light Mode Overrides for Login Page */
+    [data-theme="light"] body {
+      background: radial-gradient(ellipse at 50% 10%, #E2E8F0 0%, #CBD5E1 75%) !important;
+      color: #0F172A !important;
+    }
+
+    [data-theme="light"] body::before {
+      background-image:
+        linear-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37, 99, 235, 0.05) 1px, transparent 1px) !important;
+    }
+
+    [data-theme="light"] .login-container {
+      background: rgba(255, 255, 255, 0.96) !important;
+      border: 1px solid #CBD5E1 !important;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08), 0 0 25px rgba(37, 99, 235, 0.08) !important;
+    }
+
+    [data-theme="light"] .login-container h1,
+    [data-theme="light"] .login-container h3 {
+      color: #0F172A !important;
+    }
+
+    [data-theme="light"] .brand-badge {
+      background: rgba(37, 99, 235, 0.1) !important;
+      border-color: rgba(37, 99, 235, 0.3) !important;
+      color: #0284C7 !important;
+    }
+
+    [data-theme="light"] .field-label {
+      color: #334155 !important;
+    }
+
+    [data-theme="light"] .custom-input {
+      background: #F8FAFC !important;
+      border-color: #CBD5E1 !important;
+      color: #0F172A !important;
+    }
+
+    [data-theme="light"] .custom-input:focus {
+      border-color: #2563EB !important;
+      background: #FFFFFF !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+    }
+
+    [data-theme="light"] .custom-input::placeholder {
+      color: #94A3B8 !important;
+    }
+
+    [data-theme="light"] .form-options {
+      color: #475569 !important;
+    }
+
+    [data-theme="light"] .admin-notice {
+      background: rgba(37, 99, 235, 0.06) !important;
+      border-color: rgba(37, 99, 235, 0.2) !important;
+      color: #475569 !important;
+    }
+
+    [data-theme="light"] .sys-pill {
+      background: #F1F5F9 !important;
+      border-color: #E2E8F0 !important;
+      color: #475569 !important;
+    }
+
+    [data-theme="light"] .preset-account-item {
+      background: #F8FAFC !important;
+      border-color: #E2E8F0 !important;
+    }
+
+    [data-theme="light"] .preset-account-item:hover {
+      background: #F1F5F9 !important;
+      border-color: #2563EB !important;
+    }
+
+    [data-theme="light"] .preset-account-name {
+      color: #0F172A !important;
+    }
+
+    [data-theme="light"] .preset-account-badge {
+      color: #475569 !important;
+    }
+
+    [data-theme="light"] .toast {
+      background: #FFFFFF !important;
+      color: #0F172A !important;
+      border: 1px solid #E2E8F0 !important;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="glow-orb glow-orb-1"></div>
+  <div class="glow-orb glow-orb-2"></div>
+
+  <div class="auth-wrapper">
+    <!-- Theme Switcher Options (Dark / Light) -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 14px;">
+      <div class="theme-switch-control" id="login-theme-switch-container" role="group" aria-label="Theme Selection Options">
+        <button type="button" class="theme-btn active" id="login-theme-btn-dark" data-theme-val="dark" onclick="setTheme('dark')" title="Switch to Dark Theme">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <span>Dark</span>
+        </button>
+        <button type="button" class="theme-btn" id="login-theme-btn-light" data-theme-val="light" onclick="setTheme('light')" title="Switch to Light Theme">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <span>Light</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="login-container">
+
+      <!-- Header & Brand -->
+      <div style="text-align: center; margin-bottom: 26px;">
+        <div class="brand-badge">
+          <span>🛡 ISO/IEC 27037 FORENSIC PORTAL</span>
+        </div>
+        <div class="brand-logo"
+          style="margin: 0 auto 12px; width: 52px; height: 52px; background: linear-gradient(135deg, #3A86FF 0%, #8338EC 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 24px rgba(58, 134, 255, 0.45);">
+          <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: white;">
+            <path
+              d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
+          </svg>
+        </div>
+        <h1 style="font-size: 21px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.3px;">DIGITAL FORENSICS INTEGRITY VAULT</h1>
+        <p style="font-size: 13px; color: var(--text-secondary, #94A3B8); margin-top: 5px;">
+          Multi-Factor Evidence Verification & XAI Anomaly Detection
+        </p>
+      </div>
+
+      <!-- ==========================================
+           AUTHENTICATION FORM
+           ========================================== -->
+      <form id="login-form" autocomplete="off">
+        <div class="field-group">
+          <label class="field-label" for="login-email">Official Email Address</label>
+          <div class="input-wrapper">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <input
+              type="email"
+              id="login-email"
+              class="custom-input"
+              placeholder="e.g. investigator@forensics.lab"
+              required
+              autofocus />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="login-password">Security Passcode</label>
+          <div class="input-wrapper">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <input
+              type="password"
+              id="login-password"
+              class="custom-input"
+              placeholder="Enter your security passcode"
+              required />
+            <button
+              type="button"
+              class="pwd-toggle-btn"
+              title="Toggle passcode visibility"
+              onclick="togglePasswordVisibility('login-password', this)">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox" id="remember-session" checked />
+            <span>Maintain secure session</span>
+          </label>
+          <span style="color: var(--accent-cyan, #48CAE4); font-size: 11.5px;">ISO/IEC 27037 Auth</span>
+        </div>
+
+        <button type="submit" id="btn-login-submit" class="submit-btn">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="10 17 15 12 10 7"></polyline>
+            <line x1="15" y1="12" x2="3" y2="12"></line>
+          </svg>
+          <span id="login-btn-text">Authenticate & Access Vault</span>
+        </button>
+      </form>
+
+      <!-- Administrator Provisioning Notice -->
+      <div class="admin-notice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>Accounts and credentials are provisioned exclusively by Laboratory Administrators.</span>
+      </div>
+
+      <!-- System Verification Protocol Badges -->
+      <div class="system-tags">
+        <span class="sys-pill">SHA-256 / SHA3</span>
+        <span class="sys-pill">TreeSHAP Explainability</span>
+        <span class="sys-pill">Immutable Custody</span>
+        <span class="sys-pill">ISO/IEC 27037 RBAC</span>
+      </div>
+
+      <div class="portal-info-footer">
+        Explainable AI Digital Forensics & Multi-Factor Verification Platform
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    function showToast(msg, type = "info") {
+      const container = document.getElementById("toast-container");
+      if (!container) return;
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(100%)";
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function togglePasswordVisibility(id, btn) {
+      const input = document.getElementById(id);
+      if (!input) return;
+      if (input.type === "password") {
+        input.type = "text";
+        if (btn) {
+          btn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+          `;
+        }
+      } else {
+        input.type = "password";
+        if (btn) {
+          btn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          `;
+        }
+      }
+    }
+
+    // Handle Login Form Submit
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const pwd = document.getElementById('login-password').value;
+      const submitBtn = document.getElementById("btn-login-submit");
+      const btnText = document.getElementById("login-btn-text");
+
+      if (!email || !pwd) {
+        showToast("Please provide both official email and security passcode.", "warning");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      btnText.textContent = "Verifying Credentials...";
+
+      try {
+        const resp = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password: pwd })
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+          throw new Error(data.detail || "Authentication failed.");
+        }
+        localStorage.setItem("forensics_jwt_token", data.access_token);
+        localStorage.setItem("forensics_user", JSON.stringify(data.user));
+        showToast("Authentication successful. Redirecting...", "success");
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 600);
+      } catch (err) {
+        showToast(err.message, "error");
+        submitBtn.disabled = false;
+        btnText.textContent = "Authenticate & Access Vault";
+      }
+    });
+  </script>
+</body>
+
+</html>

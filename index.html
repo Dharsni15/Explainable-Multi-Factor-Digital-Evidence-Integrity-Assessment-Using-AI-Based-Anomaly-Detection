@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Evidence Integrity Assessment & Anomaly Detection Framework</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css" />
+
+  <!-- Early Theme Initializer to prevent flicker -->
+  <script>
+    (function() {
+      var savedTheme = localStorage.getItem('forensics_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>FORENSIC XAI</h1>
+          <span>Integrity System</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Operations</div>
+        <a class="nav-item active" data-view="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" data-view="upload">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>Register Evidence</span>
+        </a>
+        <a class="nav-item" data-view="evidence">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>Evidence Explorer</span>
+        </a>
+
+        <div class="nav-section-label">Forensic Audit & AI</div>
+        <a class="nav-item" data-view="verification">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span>Verify Integrity & XAI</span>
+        </a>
+        <a class="nav-item" data-view="custody">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="18" r="3"></circle>
+            <circle cx="6" cy="6" r="3"></circle>
+            <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
+            <line x1="6" y1="9" x2="6" y2="21"></line>
+          </svg>
+          <span>Chain of Custody</span>
+        </a>
+        <a class="nav-item" data-view="analysis">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+            <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+          </svg>
+          <span>AI Diagnostics & ML</span>
+        </a>
+        <a class="nav-item" data-view="reports">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+          <span>Reports Vault</span>
+        </a>
+
+        <div class="nav-section-label admin-only-element" id="nav-admin-section-label" style="display: none;">Administration</div>
+        <a class="nav-item admin-only-element" data-view="personnel" id="nav-item-personnel" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Personnel Management</span>
+          <span class="role-pill pill-admin" style="margin-left: auto; font-size: 9px; padding: 2px 6px;">ADMIN</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar User Profile -->
+      <div class="sidebar-footer">
+        <div class="user-profile-badge">
+          <div class="user-avatar" id="current-user-avatar">JM</div>
+          <div class="user-info">
+            <div class="user-name" id="current-user-name">Agent J. Miller</div>
+            <div class="user-role" id="current-user-role">Lead Investigator (INV-881)</div>
+          </div>
+          <button id="btn-sidebar-logout" class="btn-logout" title="Sign Out / Switch Account" onclick="ForensicsAPI.logout()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-wrapper">
+      
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h2 id="topbar-view-title">Operations Dashboard</h2>
+          <p>Explainable AI Multi-Factor Digital Evidence Integrity Verification System</p>
+        </div>
+        <div class="topbar-actions">
+          <!-- Theme Switcher Options (Dark / Light) -->
+          <div class="theme-switch-control" id="theme-switch-container" role="group" aria-label="Theme Selection Options">
+            <button type="button" class="theme-btn active" id="theme-btn-dark" data-theme-val="dark" onclick="setTheme('dark')" title="Switch to Dark Theme">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+              <span>Dark</span>
+            </button>
+            <button type="button" class="theme-btn" id="theme-btn-light" data-theme-val="light" onclick="setTheme('light')" title="Switch to Light Theme">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              <span>Light</span>
+            </button>
+          </div>
+
+          <button class="btn btn-primary btn-sm" onclick="navigateTo('upload')">
+            <span>➕ Intake Evidence</span>
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="ForensicsAPI.logout()" title="Sign Out of Examiner Session" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #FCA5A5;">
+            <span>🚪 Sign Out</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Canvas Views Container -->
+      <main class="content-canvas">
+
+        <!-- =================================================================
+             VIEW 1: DASHBOARD
+             ================================================================= -->
+        <section id="view-dashboard" class="view-section active-view">
+          
+          <!-- KPI Cards Grid -->
+          <div class="grid-4">
+            <div class="card kpi-card">
+              <div>
+                <div class="kpi-label">Total Registered Evidence</div>
+                <div class="kpi-value" id="kpi-total-evidence">0</div>
+                <div class="kpi-subtext">Cryptographic Vault Baselines</div>
+              </div>
+              <div class="kpi-icon-box blue">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              </div>
+            </div>
+
+            <div class="card kpi-card">
+              <div>
+                <div class="kpi-label">Audited / Verified</div>
+                <div class="kpi-value" id="kpi-verified-count">0</div>
+                <div class="kpi-subtext">Multi-Factor Checks Completed</div>
+              </div>
+              <div class="kpi-icon-box emerald">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+            </div>
+
+            <div class="card kpi-card">
+              <div>
+                <div class="kpi-label">Potential Anomalies</div>
+                <div class="kpi-value" id="kpi-anomalies-count" style="color: var(--risk-medium);">0</div>
+                <div class="kpi-subtext">Flagged Cross-Factor Anomalies</div>
+              </div>
+              <div class="kpi-icon-box amber">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </div>
+            </div>
+
+            <div class="card kpi-card">
+              <div>
+                <div class="kpi-label">High Integrity Risk</div>
+                <div class="kpi-value" id="kpi-high-risk-count" style="color: var(--risk-high);">0</div>
+                <div class="kpi-subtext">Score &gt; 60 (Examiner Review Req.)</div>
+              </div>
+              <div class="kpi-icon-box rose">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Grid -->
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                  Operational Risk Tier Distribution
+                </div>
+              </div>
+              <div style="height: 240px; position: relative;">
+                <canvas id="chart-risk-dist"></canvas>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                  Evidence Lifecycle Status Breakdown
+                </div>
+              </div>
+              <div style="height: 240px; position: relative;">
+                <canvas id="chart-status-dist"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Evidence & Recent Custody Grid -->
+          <div class="grid-2-1">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                  Recent Evidence Registrations
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="navigateTo('evidence')">View All</button>
+              </div>
+              <div class="table-container">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Evidence File / Case</th>
+                      <th>Category</th>
+                      <th>Risk Tier</th>
+                      <th>Status</th>
+                      <th>Registered</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recent-evidence-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  Live Custody Event Stream
+                </div>
+              </div>
+              <div id="recent-custody-stream" style="max-height: 340px; overflow-y: auto;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Academic Disclaimer Banner -->
+          <div class="disclaimer-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <div>
+              <b>Research Notice:</b> This system is an academic research prototype. AI assessments provide operational anomaly detection to assist forensic examiners and do not replace formal courtroom certification or establish legal guilt.
+            </div>
+          </div>
+
+        </section>
+
+        <!-- =================================================================
+             VIEW 2: REGISTER EVIDENCE (UPLOAD)
+             ================================================================= -->
+        <!-- =================================================================
+             VIEW 2: REGISTER & VERIFY EVIDENCE INTEGRITY (UPLOAD)
+             ================================================================= -->
+        <section id="view-upload" class="view-section">
+          <div style="max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+
+            <!-- =============================================================
+                 SECTION 1: UPLOAD ORIGINAL EVIDENCE
+                 ============================================================= -->
+            <div class="card" id="section-upload-original">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  Upload Original Evidence
+                </div>
+                <span class="badge badge-clean">Trusted Baseline</span>
+              </div>
+
+              <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 18px;">
+                Upload the original, trusted digital evidence file. The system will calculate its SHA-256 cryptographic hash and store it as the immutable baseline standard for integrity verification.
+              </div>
+
+              <form id="evidence-upload-form">
+                <!-- Drag and drop zone for original file -->
+                <div class="upload-dropzone" id="upload-dropzone">
+                  <input type="file" id="evidence-file-input" name="file" style="display: none;" required />
+                  <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <div style="font-size: 15px; font-weight: 600; color: #FFFFFF; margin-bottom: 4px;">
+                    Drag & Drop original evidence file here, or click to browse
+                  </div>
+                  <div style="font-size: 12px; color: var(--text-muted);">
+                    Supports Images (.jpg, .png, .tiff), PDFs, Word Documents, Logs, Audio/Video up to 50 MB
+                  </div>
+                </div>
+
+                <!-- Selected Original File Preview Card -->
+                <div id="selected-file-preview" class="factor-card" style="display: none; margin-top: 18px;">
+                  <div class="factor-icon-wrap" style="background: rgba(58, 134, 255, 0.2); color: var(--accent-blue);">
+                    📁
+                  </div>
+                  <div class="factor-details">
+                    <div style="font-weight: 700; color: #FFFFFF;" id="preview-filename">evidence_file.jpg</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);" id="preview-filesize">2.4 MB</div>
+                    <div style="font-size: 11px; color: var(--accent-cyan); font-family: var(--font-mono);" id="preview-filetype">image/jpeg</div>
+                  </div>
+                </div>
+
+                <div class="grid-2" style="margin-top: 20px;">
+                  <div class="form-group">
+                    <label class="form-label">Case Identifier Number</label>
+                    <input type="text" class="form-input" name="case_number" value="CASE-2026-X01" placeholder="e.g. CASE-2026-X01" required />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Source / Seizure Device</label>
+                    <input type="text" class="form-input" name="source_device" value="Seized Target Host (Drive C:)" placeholder="e.g. Target Workstation Laptop" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Evidence Item Description / Intake Notes</label>
+                  <textarea class="form-textarea" name="description" rows="2" placeholder="Describe the origin and collection context of this digital evidence item..."></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                  <button type="button" class="btn btn-secondary" onclick="navigateTo('dashboard')">Cancel</button>
+                  <button type="submit" class="btn btn-primary" id="btn-submit-upload">
+                    <span>Register Baseline Hash</span>
+                  </button>
+                </div>
+              </form>
+
+              <!-- Display Original Filename & Calculated Baseline Hash -->
+              <div id="registered-baseline-display" style="display: none; margin-top: 20px; padding: 18px; background: rgba(16, 185, 129, 0.08); border: 1.5px solid rgba(16, 185, 129, 0.35); border-radius: var(--radius-md);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">🔒</span>
+                    <span style="font-weight: 700; color: #10B981; font-size: 14px;">Original Baseline Hash Registered</span>
+                  </div>
+                  <span class="badge badge-clean" id="baseline-evidence-id-badge">EV-2026-0001</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 150px 1fr; gap: 10px; font-size: 13px;">
+                  <div style="color: var(--text-muted); font-weight: 600;">Original Filename:</div>
+                  <div style="color: #FFFFFF; font-weight: 700;" id="baseline-filename-val">-</div>
+                  <div style="color: var(--text-muted); font-weight: 600;">Calculated SHA-256:</div>
+                  <div class="font-mono" style="color: var(--accent-cyan); word-break: break-all; font-size: 12px; background: rgba(7, 13, 30, 0.6); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" id="baseline-hash-val">-</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- =============================================================
+                 SECTION 2: UPLOAD EVIDENCE FOR INTEGRITY VERIFICATION
+                 ============================================================= -->
+            <div class="card" id="section-upload-verification">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                  Upload Evidence for Integrity Verification
+                </div>
+                <span class="badge badge-medium">Verification</span>
+              </div>
+
+              <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 18px;">
+                Upload an evidence file to be verified against the registered baseline. The system will calculate its SHA-256 hash, compare both hashes on the server side, and report whether the hashes match.
+              </div>
+
+              <form id="evidence-verify-form">
+                <!-- Target Baseline Evidence Selector -->
+                <div class="form-group">
+                  <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Target Registered Baseline Evidence</span>
+                    <span style="font-size: 11px; color: var(--accent-cyan); cursor: pointer;" onclick="loadBaselineSelectOptions()">↻ Refresh Baselines</span>
+                  </label>
+                  <select id="verify-baseline-select" class="form-select" onchange="onVerifyBaselineSelected()">
+                    <option value="">-- Select a registered baseline evidence --</option>
+                  </select>
+                </div>
+
+                <!-- Selected Baseline Details Strip -->
+                <div id="verify-baseline-info-box" style="display: none; padding: 12px 16px; background: rgba(7, 13, 30, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 18px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                    <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px;">Registered Baseline Target</div>
+                    <div style="font-size: 12px; color: #FFFFFF; font-weight: 600;" id="verify-selected-baseline-filename">-</div>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">Baseline Hash (SHA-256):</div>
+                  <div class="font-mono" style="font-size: 11.5px; color: var(--accent-cyan); word-break: break-all;" id="verify-selected-baseline-hash">-</div>
+                </div>
+
+                <!-- Drag and drop zone for Verification Evidence -->
+                <div class="upload-dropzone" id="verify-dropzone">
+                  <input type="file" id="verify-file-input" name="verify_file" style="display: none;" required />
+                  <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color: var(--accent-purple);">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                  </svg>
+                  <div style="font-size: 15px; font-weight: 600; color: #FFFFFF; margin-bottom: 4px;">
+                    Drag & Drop evidence file for verification here, or click to browse
+                  </div>
+                  <div style="font-size: 12px; color: var(--text-muted);">
+                    Upload the potentially modified file to test against the trusted baseline
+                  </div>
+                </div>
+
+                <!-- Selected Verification File Preview Card -->
+                <div id="verify-file-preview" class="factor-card" style="display: none; margin-top: 18px;">
+                  <div class="factor-icon-wrap" style="background: rgba(131, 56, 236, 0.2); color: var(--accent-purple);">
+                    🔍
+                  </div>
+                  <div class="factor-details">
+                    <div style="font-weight: 700; color: #FFFFFF;" id="verify-preview-filename">suspect_file.jpg</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);" id="verify-preview-filesize">2.4 MB</div>
+                    <div style="font-size: 11px; color: var(--accent-cyan); font-family: var(--font-mono);" id="verify-preview-filetype">image/jpeg</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 18px;">
+                  <button type="button" class="btn btn-secondary" onclick="resetVerificationForm()">Clear</button>
+                  <button type="submit" class="btn btn-primary" id="btn-verify-integrity">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M9 12l2 2 4-4"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                    <span>Verify Integrity</span>
+                  </button>
+                </div>
+              </form>
+
+              <!-- Display Verification Results (Original Hash, Verification Hash, Final Result) -->
+              <div id="integrity-verification-result-box" style="display: none; margin-top: 24px;">
+                <!-- Final Result Banner -->
+                <div id="integrity-result-banner" style="padding: 16px 20px; border-radius: var(--radius-md); text-align: center; margin-bottom: 18px; font-weight: 800; font-size: 16px; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                  <!-- Dynamic content: INTEGRITY VERIFIED — HASH MATCH or INTEGRITY MISMATCH — HASH MISMATCH -->
+                </div>
+
+                <!-- Hash Comparison Card -->
+                <div style="background: rgba(7, 13, 30, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px;">
+                  <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 14px;">
+                    Cryptographic SHA-256 Fingerprint Comparison
+                  </div>
+
+                  <!-- Original Hash Row -->
+                  <div style="margin-bottom: 14px; padding: 12px 14px; background: rgba(13, 23, 48, 0.7); border-radius: var(--radius-sm); border-left: 4px solid var(--accent-cyan);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
+                      <span style="font-size: 12px; font-weight: 700; color: #FFFFFF;">Original Baseline Hash (SHA-256)</span>
+                      <span style="font-size: 11px; color: var(--text-muted);" id="res-original-filename-label">-</span>
+                    </div>
+                    <div class="font-mono" style="font-size: 12px; color: var(--accent-cyan); word-break: break-all;" id="res-original-hash-val">-</div>
+                  </div>
+
+                  <!-- Verification Hash Row -->
+                  <div id="res-verification-box" style="margin-bottom: 14px; padding: 12px 14px; background: rgba(13, 23, 48, 0.7); border-radius: var(--radius-sm); border-left: 4px solid var(--accent-purple);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
+                      <span style="font-size: 12px; font-weight: 700; color: #FFFFFF;">Verification File Hash (SHA-256)</span>
+                      <span style="font-size: 11px; color: var(--text-muted);" id="res-verification-filename-label">-</span>
+                    </div>
+                    <div class="font-mono" style="font-size: 12px; color: #FFFFFF; word-break: break-all;" id="res-verification-hash-val">-</div>
+                  </div>
+
+                  <!-- Details & Forensic Explanation -->
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); font-size: 12px;">
+                    <div>
+                      <span style="color: var(--text-muted);">Algorithm:</span> 
+                      <strong style="color: #FFFFFF;">SHA-256 (256-bit Secure Hash)</strong>
+                    </div>
+                    <div>
+                      <span style="color: var(--text-muted);">Audit Time:</span> 
+                      <strong style="color: #FFFFFF;" id="res-verified-timestamp">-</strong>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                      <span style="color: var(--text-muted);">Forensic Finding:</span> 
+                      <span style="color: var(--text-primary);" id="res-forensic-notes">-</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="navigateToAuditFromUpload()">
+                    <span>Open Complete Forensic Audit & Explainable AI Suite →</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- =================================================================
+             VIEW 3: EVIDENCE EXPLORER
+             ================================================================= -->
+        <section id="view-evidence" class="view-section">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                Digital Evidence Repository & Audit Registry
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="navigateTo('upload')">
+                <span>➕ Intake Evidence</span>
+              </button>
+            </div>
+
+            <!-- Filters Bar -->
+            <div style="display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap;">
+              <input type="text" id="filter-search" class="form-input" style="max-width: 280px;" placeholder="Search ID, file, or case..." oninput="loadEvidenceList()" />
+              
+              <select id="filter-category" class="form-select" style="max-width: 180px;" onchange="loadEvidenceList()">
+                <option value="ALL">All Categories</option>
+                <option value="Image">Images</option>
+                <option value="Document">Documents (PDF/Docx)</option>
+                <option value="Log/Text">System Logs / Text</option>
+                <option value="Audio/Video">Audio / Video</option>
+              </select>
+
+              <select id="filter-risk" class="form-select" style="max-width: 180px;" onchange="loadEvidenceList()">
+                <option value="ALL">All Risk Tiers</option>
+                <option value="LOW">Low Risk (0-30)</option>
+                <option value="MEDIUM">Medium Risk (31-60)</option>
+                <option value="HIGH">High Risk (61-100)</option>
+                <option value="UNVERIFIED">Unverified Only</option>
+              </select>
+
+              <button class="btn btn-secondary btn-sm" style="margin-left: auto;" onclick="loadEvidenceList()">Refresh List</button>
+            </div>
+
+            <div class="table-container">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Evidence ID</th>
+                    <th>Filename / Case</th>
+                    <th>Category</th>
+                    <th>Size</th>
+                    <th>Risk Score</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Operations</th>
+                  </tr>
+                </thead>
+                <tbody id="evidence-explorer-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             VIEW 4: VERIFY INTEGRITY & EXPLAINABLE AI SUITE
+             ================================================================= -->
+        <section id="view-verification" class="view-section">
+          
+          <!-- Header Banner with Active Evidence Info -->
+          <div class="card" style="margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+              <div>
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700; letter-spacing: 1px;">
+                  Active Forensic Target
+                </div>
+                <h3 id="verify-evidence-select-display" style="font-size: 20px; font-weight: 800; color: #FFFFFF; margin: 4px 0;">
+                  Select Evidence to Audit
+                </h3>
+                <div id="verify-file-details" style="font-size: 12.5px; color: var(--text-secondary);">
+                  Please choose an evidence item from the Evidence Explorer or Dashboard to initiate verification.
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-primary" id="btn-run-verification" onclick="runVerification()">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                  <span>Run Full Integrity Audit</span>
+                </button>
+                <button class="btn btn-secondary" onclick="triggerReportGeneration()">
+                  <span>📄 Generate PDF Report</span>
+                </button>
+                <button class="btn btn-primary" id="btn-modification-report" onclick="triggerModificationReportGeneration()" style="background: linear-gradient(135deg, #0ea5e9, #2563eb); border-color: #38bdf8;">
+                  <span>🔍 Generate Modification Report</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Dynamic Results Container -->
+          <div id="verification-results-container" style="display: none;">
+            
+            <!-- Operational Risk Summary Card -->
+            <div class="card" style="background: linear-gradient(135deg, rgba(16, 28, 58, 0.9), rgba(13, 23, 48, 0.95)); border: 1.5px solid var(--border-color); margin-bottom: 24px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                <div>
+                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700;">
+                    Multi-Factor Operational Integrity Assessment
+                  </div>
+                  <div style="display: flex; align-items: baseline; gap: 14px; margin: 6px 0;">
+                    <div id="result-risk-score-value" class="font-mono" style="font-size: 38px; font-weight: 900; color: #FFFFFF;">
+                      0.0 / 100
+                    </div>
+                    <span id="result-risk-level-badge" class="badge badge-low" style="font-size: 13px; padding: 5px 12px;">
+                      LOW RISK
+                    </span>
+                  </div>
+                  <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                    <b>Forensic Recommendation:</b> <span id="result-recommendation-text">Standard baseline verified.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Multi-Factor Diagnostics Matrix Grid -->
+            <div class="grid-2">
+              
+              <!-- Factor 1: Cryptographic Hash -->
+              <div class="factor-card">
+                <div class="factor-icon-wrap" style="background: rgba(58, 134, 255, 0.15); color: var(--accent-blue);">
+                  🔑
+                </div>
+                <div class="factor-details">
+                  <div class="factor-title-row">
+                    <div class="factor-name">1. Cryptographic Hash Consistency (SHA-256)</div>
+                    <div id="factor-hash-status"><span class="badge badge-clean">MATCH</span></div>
+                  </div>
+                  <div class="factor-desc" id="factor-hash-desc">Fingerprint strictly identical to baseline registration.</div>
+                </div>
+              </div>
+
+              <!-- Factor 2: Metadata Structural Consistency -->
+              <div class="factor-card">
+                <div class="factor-icon-wrap" style="background: rgba(72, 202, 228, 0.15); color: var(--accent-cyan);">
+                  📋
+                </div>
+                <div class="factor-details">
+                  <div class="factor-title-row">
+                    <div class="factor-name">2. Metadata Structural Consistency</div>
+                    <div id="factor-meta-status"><span class="badge badge-clean">CONSISTENT</span></div>
+                  </div>
+                  <div class="factor-desc" id="factor-meta-desc">Container properties conform to registered profile.</div>
+                </div>
+              </div>
+
+              <!-- Factor 3: Timestamp Logic -->
+              <div class="factor-card">
+                <div class="factor-icon-wrap" style="background: rgba(16, 185, 129, 0.15); color: var(--risk-low);">
+                  ⏱
+                </div>
+                <div class="factor-details">
+                  <div class="factor-title-row">
+                    <div class="factor-name">3. Timeline & Timestamp Validity</div>
+                    <div id="factor-ts-status"><span class="badge badge-clean">VALID</span></div>
+                  </div>
+                  <div class="factor-desc" id="factor-ts-desc">Chronological sequence adheres to causal logic.</div>
+                </div>
+              </div>
+
+              <!-- Factor 4: Chain of Custody -->
+              <div class="factor-card">
+                <div class="factor-icon-wrap" style="background: rgba(245, 158, 11, 0.15); color: var(--risk-medium);">
+                  🔗
+                </div>
+                <div class="factor-details">
+                  <div class="factor-title-row">
+                    <div class="factor-name">4. Chain-of-Custody Continuity</div>
+                    <div id="factor-custody-status"><span class="badge badge-clean">COMPLETE</span></div>
+                  </div>
+                  <div class="factor-desc" id="factor-custody-desc">Handover continuity intact across logged sequence.</div>
+                </div>
+              </div>
+
+              <!-- Factor 5: Provenance Lineage -->
+              <div class="factor-card">
+                <div class="factor-icon-wrap" style="background: rgba(131, 56, 236, 0.15); color: var(--accent-purple);">
+                  🌐
+                </div>
+                <div class="factor-details">
+                  <div class="factor-title-row">
+                    <div class="factor-name">5. Provenance Lifecycle Lineage</div>
+                    <div id="factor-prov-status"><span class="badge badge-clean">CONSISTENT</span></div>
+                  </div>
+                  <div class="factor-desc" id="factor-prov-desc">Unbroken audit trail across forensic operations.</div>
+                </div>
+              </div>
+
+              <!-- Factor 6: AI ML Anomaly Detection -->
+              <div class="factor-card">
+                <div class="factor-icon-wrap" style="background: rgba(239, 68, 68, 0.15); color: var(--risk-high);">
+                  🤖
+                </div>
+                <div class="factor-details">
+                  <div class="factor-title-row">
+                    <div class="factor-name">6. AI Anomaly Pattern (Isolation Forest)</div>
+                    <div id="factor-ai-status"><span class="badge badge-clean">NORMAL</span></div>
+                  </div>
+                  <div class="factor-desc" id="factor-ai-desc">Cross-factor feature distribution matches typical authentic baseline.</div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- EXPLAINABLE AI (XAI) SECTION -->
+            <div class="card" style="margin-top: 10px;">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                  Explainable AI (XAI) – "WHY Was This Evidence Flagged?"
+                </div>
+                <span class="badge badge-unverified" style="font-family: var(--font-mono);">SHAP Attribution Framework</span>
+              </div>
+
+              <!-- Human-Readable Narrative Box -->
+              <div style="background: rgba(7, 13, 30, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700; margin-bottom: 6px;">
+                  AI Forensic Diagnostic Explanation
+                </div>
+                <div id="xai-narrative-summary" style="font-size: 13.5px; color: #FFFFFF; line-height: 1.6;">
+                  Running diagnostic explanation...
+                </div>
+              </div>
+
+              <!-- SHAP Feature Contributions Grid -->
+              <div class="grid-2">
+                <div>
+                  <div style="font-size: 12.5px; font-weight: 700; color: #FFFFFF; margin-bottom: 12px;">
+                    Feature Attribution Magnitude & Direction (SHAP Values)
+                  </div>
+                  <div style="height: 260px; position: relative;">
+                    <canvas id="chart-xai-attributions"></canvas>
+                  </div>
+                  <div style="display: flex; gap: 16px; margin-top: 12px; font-size: 11.5px; justify-content: center;">
+                    <span style="color: var(--risk-high);">■ Red: Increases Operational Risk</span>
+                    <span style="color: var(--risk-low);">■ Green: Reassures / Decreases Risk</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="font-size: 12.5px; font-weight: 700; color: #FFFFFF; margin-bottom: 12px;">
+                    Forensic Indicator Contribution Breakdown
+                  </div>
+                  <div class="table-container" style="max-height: 280px; overflow-y: auto;">
+                    <table class="custom-table">
+                      <thead>
+                        <tr>
+                          <th>Factor Feature</th>
+                          <th>Value</th>
+                          <th>SHAP Impact</th>
+                          <th>Direction</th>
+                        </tr>
+                      </thead>
+                      <tbody id="xai-factors-tbody">
+                        <!-- Populated dynamically -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- EVIDENCE MODIFICATION EXPLANATION REPORT SECTION -->
+            <div class="card" id="card-modification-report" style="margin-top: 20px; border: 1.5px solid rgba(58, 134, 255, 0.4);">
+              <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  Evidence Modification Explanation Report
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                  <span id="card-mod-status-badge" class="badge badge-clean" style="font-size: 12px; padding: 5px 12px;">STATUS: PENDING</span>
+                  <button class="btn btn-primary btn-sm" onclick="triggerModificationReportGeneration()" style="background: linear-gradient(135deg, #0ea5e9, #2563eb); border-color: #38bdf8;">
+                    <span>🔍 Generate Modification Report</span>
+                  </button>
+                  <button class="btn btn-secondary btn-sm" id="btn-inline-download-mod-pdf" onclick="downloadModificationReportPdf()" style="display: none;">
+                    <span>📄 Download PDF</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Evidence & Hash Verification Comparison Banner -->
+              <div style="background: rgba(13, 23, 48, 0.7); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; margin-bottom: 16px;">
+                <div class="grid-2" style="gap: 12px; font-size: 12.5px;">
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Original Baseline File</div>
+                    <div id="card-mod-orig-filename" style="color: #93C5FD; font-weight: 600;">-</div>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Verification File</div>
+                    <div id="card-mod-verif-filename" style="color: #FCA5A5; font-weight: 600;">-</div>
+                  </div>
+                  <div style="grid-column: span 2;">
+                    <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Original SHA-256 Hash</div>
+                    <div id="card-mod-orig-hash" class="font-mono" style="font-size: 11.5px; color: #6EE7B7; word-break: break-all;">-</div>
+                  </div>
+                  <div style="grid-column: span 2;">
+                    <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Verification SHA-256 Hash</div>
+                    <div id="card-mod-verif-hash" class="font-mono" style="font-size: 11.5px; color: #FCA5A5; word-break: break-all;">-</div>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Verification Timestamp (UTC)</div>
+                    <div id="card-mod-timestamp" class="font-mono" style="color: var(--text-secondary); font-size: 11.5px;">-</div>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Overall Integrity Result</div>
+                    <div id="card-mod-overall-status" style="font-weight: 800; font-size: 13px;">-</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Forensic Narrative Explanation Box -->
+              <div style="background: rgba(7, 13, 30, 0.7); border-left: 3px solid var(--accent-blue); padding: 14px 18px; border-radius: 4px; margin-bottom: 20px;">
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700; margin-bottom: 4px;">
+                  Forensic Explanation & Meaning of Differences
+                </div>
+                <div id="card-mod-explanation-text" style="font-size: 13px; color: #F1F5F9; line-height: 1.55;">
+                  Click "Generate Modification Report" to initiate algorithmic bitstream and structural diffing between the baseline and verification files.
+                </div>
+              </div>
+
+              <!-- Detected Modifications Table -->
+              <div id="card-mod-table-container" style="margin-bottom: 20px; display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <div style="font-size: 13px; font-weight: 700; color: #FFFFFF;">
+                    Detected Modifications (<span id="card-mod-count">0</span>)
+                  </div>
+                  <span style="font-size: 11px; color: var(--text-muted);">Confirmed differences algorithmically isolated</span>
+                </div>
+                <div class="table-container" style="max-height: 280px; overflow-y: auto;">
+                  <table class="custom-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 15%;">Location</th>
+                        <th style="width: 25%;">Original Value</th>
+                        <th style="width: 25%;">Verification Value</th>
+                        <th style="width: 35%;">Detected Change & Explanation</th>
+                      </tr>
+                    </thead>
+                    <tbody id="card-mod-tbody">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Metadata Differences Table -->
+              <div id="card-mod-meta-container" style="margin-bottom: 20px; display: none;">
+                <div style="font-size: 13px; font-weight: 700; color: #FFFFFF; margin-bottom: 8px;">
+                  Metadata Differences
+                </div>
+                <div class="table-container" style="max-height: 180px; overflow-y: auto;">
+                  <table class="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Attribute</th>
+                        <th>Original Baseline</th>
+                        <th>Verification File</th>
+                        <th>Detected Difference</th>
+                      </tr>
+                    </thead>
+                    <tbody id="card-mod-meta-tbody">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Analysis Scope & Uncompared Limitations -->
+              <div id="card-mod-limitations-container" style="background: rgba(13, 23, 48, 0.4); border: 1px dashed var(--border-color); border-radius: var(--radius-md); padding: 12px 16px; display: none;">
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">
+                  Analysis Limitations & Uncompared Information
+                </div>
+                <ul id="card-mod-limitations-list" style="margin: 0; padding-left: 18px; font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+                  <!-- Populated dynamically -->
+                </ul>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- =================================================================
+             VIEW 5: CHAIN OF CUSTODY
+             ================================================================= -->
+        <section id="view-custody" class="view-section">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><line x1="6" y1="9" x2="6" y2="21"></line></svg>
+                Digital Evidence Chain of Custody & Handler Timeline
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openAddCustodyModal()">
+                <span>➕ Log Handover Event</span>
+              </button>
+            </div>
+
+            <div id="custody-evidence-header" style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">
+              Select an evidence item to view its custody history.
+            </div>
+
+            <div id="custody-status-banner" class="disclaimer-banner clean" style="margin-bottom: 24px;">
+            <!-- Provenance Summary Card -->
+            <div id="provenance-details-card" style="margin-bottom: 20px; padding: 16px; background: rgba(7, 13, 30, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-md); display: none;">
+              <div style="font-size: 11px; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;">
+                Evidence Provenance & Origin Record
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 12px; margin-bottom: 10px;">
+                <div><span style="color: var(--text-muted);">Origin / Source:</span> <b id="prov-origin-val" style="color: #FFFFFF;">UNAVAILABLE</b></div>
+                <div><span style="color: var(--text-muted);">Case Association:</span> <b id="prov-case-val" style="color: #FFFFFF;">UNAVAILABLE</b></div>
+                <div><span style="color: var(--text-muted);">Current Status:</span> <span id="prov-status-val" class="badge badge-unverified">UNAVAILABLE</span></div>
+                <div><span style="color: var(--text-muted);">Intake Timestamp (UTC):</span> <span id="prov-intake-val" class="font-mono">UNAVAILABLE</span></div>
+                <div><span style="color: var(--text-muted);">Baseline Created (UTC):</span> <span id="prov-baseline-created-val" class="font-mono">UNAVAILABLE</span></div>
+                <div><span style="color: var(--text-muted);">Latest Verification Result:</span> <b id="prov-verify-result-val" style="color: var(--accent-cyan);">NOT VERIFIED</b></div>
+              </div>
+              <div style="font-size: 11.5px; padding-top: 8px; border-top: 1px solid rgba(64, 93, 148, 0.2);">
+                <span style="color: var(--text-muted);">Baseline SHA-256 Hash:</span>
+                <span id="prov-hash-val" class="font-mono" style="color: var(--accent-cyan); word-break: break-all; margin-left: 6px;">UNAVAILABLE</span>
+              </div>
+            </div>
+
+            <!-- Vertical Interactive Timeline -->
+            <div class="timeline" id="custody-timeline-container">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             VIEW 6: AI DIAGNOSTICS & ML BENCHMARK
+             ================================================================= -->
+        <section id="view-analysis" class="view-section">
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                Machine Learning Anomaly Detection Benchmark Matrix
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="loadMLBenchmarkMetrics()">
+                <span>🔄 Refresh Benchmark</span>
+              </button>
+            </div>
+
+            <div style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 18px;">
+              Experimental validation comparing Primary Unsupervised Model (<b>Isolation Forest</b>) against comparative supervised classifiers on the controlled 1,200-sample multi-factor digital forensic benchmark dataset.
+            </div>
+
+            <div class="table-container" style="margin-bottom: 24px;">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Model Architecture</th>
+                    <th>Accuracy</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>F1-Score</th>
+                    <th>ROC-AUC</th>
+                    <th>False Pos. Rate</th>
+                  </tr>
+                </thead>
+                <tbody id="ml-metrics-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Radar / Multi-Metric Comparison Chart -->
+            <div class="grid-2">
+              <div>
+                <div style="font-size: 13px; font-weight: 700; color: #FFFFFF; margin-bottom: 12px;">
+                  Model Performance Comparison (Radar Benchmark)
+                </div>
+                <div style="height: 280px; position: relative;">
+                  <canvas id="chart-model-comparison"></canvas>
+                </div>
+              </div>
+
+              <div style="background: rgba(7, 13, 30, 0.5); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px;">
+                <div style="font-size: 13px; font-weight: 700; color: #FFFFFF; margin-bottom: 8px;">
+                  Forensic Methodology & Architecture Justification
+                </div>
+                <ul style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.7; padding-left: 18px;">
+                  <li><b>Why Isolation Forest?</b> Real-world digital evidence forensics often lacks pre-labeled fraud datasets. Isolation Forest excels in detecting anomalous isolation paths across high-dimensional feature combinations without requiring prior supervision.</li>
+                  <li><b>Why Multi-Factor?</b> Single factors (such as hashes alone) only detect bit changes. Correlating metadata, timestamps, and custody links captures contextual tampering.</li>
+                  <li><b>Why SHAP?</b> Forensic examiners require transparent accountability to present in investigative proceedings explaining exactly which indicators caused a risk flag.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             VIEW 7: REPORTS VAULT
+             ================================================================= -->
+        <section id="view-reports" class="view-section">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                Digital Evidence Forensic Verification Reports Vault
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="loadReportsList()">Refresh</button>
+            </div>
+
+            <div class="table-container">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Evidence ID</th>
+                    <th>Report Document</th>
+                    <th>Generated By</th>
+                    <th>Timestamp</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="reports-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <!-- =================================================================
+             VIEW 8: PERSONNEL MANAGEMENT (ADMIN ONLY)
+             ================================================================= -->
+        <section id="view-personnel" class="view-section">
+          
+          <!-- Admin Access Banner -->
+          <div class="card" style="background: linear-gradient(135deg, rgba(131, 56, 236, 0.12) 0%, rgba(58, 134, 255, 0.08) 100%); border-color: rgba(131, 56, 236, 0.4); margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(131, 56, 236, 0.25); border: 1px solid rgba(131, 56, 236, 0.5); display: flex; align-items: center; justify-content: center; color: #C084FC;">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 style="font-size: 16px; font-weight: 700; color: #FFFFFF;">Laboratory Personnel & Examiner Access Control</h3>
+                  <p style="font-size: 12.5px; color: var(--text-secondary);">
+                    Administrator clearance to provision examiner accounts, configure roles, and manage access credentials.
+                  </p>
+                </div>
+              </div>
+              <div>
+                <span class="role-pill pill-admin" style="font-size: 11px; padding: 5px 12px;">ISO/IEC 27037 RBAC RESTRICTED</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Non-Admin Warning Box (Shown dynamically if non-admin tries to view) -->
+          <div id="personnel-access-denied" class="card" style="display: none; text-align: center; padding: 48px 24px; border-color: rgba(239, 68, 68, 0.4);">
+            <div style="width: 60px; height: 60px; margin: 0 auto 16px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); display: flex; align-items: center; justify-content: center; color: #EF4444;">
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <h3 style="font-size: 18px; color: #FFFFFF; margin-bottom: 8px;">Access Restricted: Administrator Clearance Required</h3>
+            <p style="font-size: 13.5px; color: var(--text-secondary); max-width: 500px; margin: 0 auto 20px;">
+              You are currently logged in as a non-administrative account. Only Laboratory Directors and System Administrators can view, provision, and manage personnel credentials.
+            </p>
+            <button class="btn btn-primary" onclick="ForensicsAPI.logout()">Switch to Admin Account</button>
+          </div>
+
+          <!-- Admin Main Content Body -->
+          <div id="personnel-admin-content">
+            <!-- Personnel KPI Stats -->
+            <div class="grid-5" style="margin-bottom: 24px;">
+              <div class="card kpi-card">
+                <div>
+                  <div class="kpi-label">Total Personnel</div>
+                  <div class="kpi-value" id="personnel-stat-total">0</div>
+                  <div class="kpi-sub">Active laboratory users</div>
+                </div>
+                <div class="kpi-icon" style="background: rgba(58, 134, 255, 0.15); color: var(--accent-blue);">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+              </div>
+
+              <div class="card kpi-card">
+                <div>
+                  <div class="kpi-label">Forensic Researchers</div>
+                  <div class="kpi-value" id="personnel-stat-researchers">0</div>
+                  <div class="kpi-sub">Scientific R&D / XAI</div>
+                </div>
+                <div class="kpi-icon" style="background: rgba(72, 202, 228, 0.15); color: var(--accent-cyan);">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.31M14 2v7.31M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"></path><line x1="5.52" y1="16" x2="18.48" y2="16"></line></svg>
+                </div>
+              </div>
+
+              <div class="card kpi-card">
+                <div>
+                  <div class="kpi-label">Investigators</div>
+                  <div class="kpi-value" id="personnel-stat-investigators">0</div>
+                  <div class="kpi-sub">Field & intake clearance</div>
+                </div>
+                <div class="kpi-icon" style="background: rgba(58, 134, 255, 0.15); color: var(--accent-blue);">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="12 8 8 12 12 16 16 12 12 8"></polygon></svg>
+                </div>
+              </div>
+
+              <div class="card kpi-card">
+                <div>
+                  <div class="kpi-label">Digital Analysts</div>
+                  <div class="kpi-value" id="personnel-stat-analysts">0</div>
+                  <div class="kpi-sub">Verification & audit</div>
+                </div>
+                <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--risk-low);">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+              </div>
+
+              <div class="card kpi-card">
+                <div>
+                  <div class="kpi-label">Administrators</div>
+                  <div class="kpi-value" id="personnel-stat-admins">0</div>
+                  <div class="kpi-sub">Root lab clearance</div>
+                </div>
+                <div class="kpi-icon" style="background: rgba(131, 56, 236, 0.15); color: #C084FC;">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Two-Column Form & Registry Grid -->
+            <div class="personnel-layout-grid" style="display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start;">
+              
+              <!-- Card 1: Add New Personnel Form -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="8.5" cy="7" r="4"></circle>
+                      <line x1="20" y1="8" x2="20" y2="14"></line>
+                      <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                    Provision New Personnel / Researcher
+                  </div>
+                </div>
+
+                <form id="form-create-personnel" onsubmit="handleCreatePersonnelSubmit(event)" autocomplete="off">
+                  <div class="form-group">
+                    <label class="form-label" for="add-user-name">Full Personnel Name *</label>
+                    <input type="text" id="add-user-name" class="form-input" placeholder="e.g. Prof. Eleanor Wright" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="add-user-email">Official Email Address *</label>
+                    <input type="email" id="add-user-email" class="form-input" placeholder="e.g. e.wright@research.lab" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="add-user-role">Assigned System Role *</label>
+                    <select id="add-user-role" class="form-select" required>
+                      <option value="Researcher" selected>🔬 Forensic Research Scientist</option>
+                      <option value="Investigator">🕵️ Lead Forensic Investigator</option>
+                      <option value="Analyst">📊 Digital Forensics Analyst</option>
+                      <option value="Admin">🛡️ Laboratory Director / Administrator</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="add-user-badge">Badge / Researcher ID</label>
+                    <input type="text" id="add-user-badge" class="form-input" placeholder="e.g. RES-2026-101" />
+                  </div>
+
+                  <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <label class="form-label" for="add-user-password" style="margin-bottom: 0;">Initial Security Passcode *</label>
+                      <button type="button" class="btn-text-action" onclick="generateRandomPasscode('add-user-password')">
+                        🎲 Generate
+                      </button>
+                    </div>
+                    <div style="position: relative; display: flex; align-items: center;">
+                      <input type="text" id="add-user-password" class="form-input" placeholder="Min. 6 characters" required style="font-family: var(--font-mono);" />
+                    </div>
+                    <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block;">
+                      Share this passcode securely with the examiner for login.
+                    </span>
+                  </div>
+
+                  <button type="submit" id="btn-create-user-submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 8px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                    <span id="btn-create-user-text">Provision Account & Credentials</span>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Card 2: Personnel Registry Table -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    Active Personnel Registry & Access Control
+                  </div>
+                  <button class="btn btn-secondary btn-sm" onclick="loadPersonnelDirectory()">
+                    <span>🔄 Refresh</span>
+                  </button>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                  <input type="text" id="filter-personnel-search" class="form-input" placeholder="🔍 Search personnel by name, email, role, or badge ID..." oninput="filterPersonnelTable()" />
+                </div>
+
+                <div class="table-container">
+                  <table class="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Personnel</th>
+                        <th>Official Email</th>
+                        <th>Role & Clearance</th>
+                        <th>Badge ID</th>
+                        <th>Provisioned</th>
+                        <th style="text-align: right;">Credentials & Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="personnel-tbody">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- =================================================================
+       MODAL: ADD CUSTODY EVENT
+       ================================================================= -->
+  <div class="modal-overlay" id="modal-add-custody">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Append Chain of Custody Handover Event</div>
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="closeAddCustodyModal()">✕</button>
+      </div>
+      <form id="add-custody-form" onsubmit="submitNewCustodyEvent(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Action / Handling Procedure</label>
+            <select class="form-select" name="action" required>
+              <option value="Transferred to Forensics Lab">Transferred to Forensics Lab</option>
+              <option value="Accessed for Bitstream Analysis">Accessed for Bitstream Analysis</option>
+              <option value="Secured in Evidence Vault">Secured in Evidence Vault</option>
+              <option value="Transferred to Secondary Examiner">Transferred to Secondary Examiner</option>
+              <option value="Exported for Court Audit">Exported for Court Audit</option>
+            </select>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Previous Holder</label>
+              <input type="text" class="form-input" name="previous_holder" placeholder="Leaving handler..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label">New Receiving Holder</label>
+              <input type="text" class="form-input" name="new_holder" placeholder="Receiving handler..." />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Storage Location / Secure Facility</label>
+            <input type="text" class="form-input" name="location" value="Digital Forensics Lab - Locker B-04" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Forensic Notes</label>
+            <textarea class="form-textarea" name="notes" rows="2" placeholder="Document reasons for transfer or analysis notes..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeAddCustodyModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Append Custody Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =================================================================
+       MODAL: RESET / MODIFY PERSONNEL CREDENTIALS (ADMIN ONLY)
+       ================================================================= -->
+  <div class="modal-overlay" id="modal-edit-personnel">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Modify Personnel & Reset Credentials</div>
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="closeEditPersonnelModal()">✕</button>
+      </div>
+      <form id="form-edit-personnel" onsubmit="handleEditPersonnelSubmit(event)">
+        <input type="hidden" id="edit-user-id" />
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="edit-user-name">Personnel Full Name</label>
+            <input type="text" id="edit-user-name" class="form-input" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-user-email">Email Address (Read-only)</label>
+            <input type="email" id="edit-user-email" class="form-input" disabled style="opacity: 0.7; cursor: not-allowed;" />
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label" for="edit-user-role">System Role</label>
+              <select id="edit-user-role" class="form-select" required>
+                <option value="Researcher">🔬 Forensic Research Scientist</option>
+                <option value="Investigator">🕵️ Lead Forensic Investigator</option>
+                <option value="Analyst">📊 Digital Forensics Analyst</option>
+                <option value="Admin">🛡️ Laboratory Director / Administrator</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-user-badge">Badge ID Number</label>
+              <input type="text" id="edit-user-badge" class="form-input" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label class="form-label" for="edit-user-password" style="margin-bottom: 0;">Set New Passcode (Optional)</label>
+              <button type="button" class="btn-text-action" onclick="generateRandomPasscode('edit-user-password')">
+                🎲 Generate
+              </button>
+            </div>
+            <input type="text" id="edit-user-password" class="form-input" placeholder="Leave blank to keep existing passcode" style="font-family: var(--font-mono);" />
+            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block;">
+              Enter a new passcode only if the examiner forgot or needs their credentials reset.
+            </span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeEditPersonnelModal()">Cancel</button>
+          <button type="submit" id="btn-edit-user-submit" class="btn btn-primary">Save Changes & Credentials</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =================================================================
+       MODAL: CONFIRM REVOKE / DELETE PERSONNEL
+       ================================================================= -->
+  <div class="modal-overlay" id="modal-delete-personnel">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title" style="color: #EF4444;">Revoke Personnel Clearance</div>
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="closeDeletePersonnelModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="delete-user-id" />
+        <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
+          Are you sure you want to revoke access and delete the account for <b id="delete-user-name-display" style="color: #FFFFFF;"></b>?
+        </p>
+        <p style="font-size: 12px; color: #F87171; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px;">
+          ⚠️ This operator will immediately lose access to the forensic vault. Existing chain-of-custody signatures recorded in the immutable ledger will be preserved.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeDeletePersonnelModal()">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="confirmDeletePersonnelSubmit()">Revoke & Remove Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================
+       MODAL: EVIDENCE MODIFICATION EXPLANATION REPORT
+       ================================================================= -->
+  <div class="modal-overlay" id="modal-modification-report">
+    <div class="modal-box" style="max-width: 900px;">
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 10px;">
+          <span>🔍 Evidence Modification Explanation Report</span>
+          <span id="modal-mod-status-badge" class="badge badge-clean" style="font-size: 11px;">STATUS: PENDING</span>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="closeModificationReportModal()">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        
+        <!-- Evidence & File Comparison Identity Grid -->
+        <div style="background: rgba(13, 23, 48, 0.7); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; margin-bottom: 18px;">
+          <div class="grid-2" style="gap: 12px; font-size: 12.5px;">
+            <div>
+              <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Evidence Identifier</div>
+              <div id="modal-mod-evidence-id" class="font-mono" style="color: #FFFFFF; font-weight: 700;">-</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Case Number</div>
+              <div id="modal-mod-case-number" style="color: #FFFFFF; font-weight: 700;">-</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Original Baseline File</div>
+              <div id="modal-mod-orig-filename" style="color: #93C5FD; font-weight: 600;">-</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Verification File</div>
+              <div id="modal-mod-verif-filename" style="color: #FCA5A5; font-weight: 600;">-</div>
+            </div>
+            <div style="grid-column: span 2;">
+              <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Original Baseline SHA-256</div>
+              <div id="modal-mod-orig-hash" class="font-mono" style="font-size: 11.5px; color: #6EE7B7; word-break: break-all;">-</div>
+            </div>
+            <div style="grid-column: span 2;">
+              <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Verification SHA-256</div>
+              <div id="modal-mod-verif-hash" class="font-mono" style="font-size: 11.5px; color: #FCA5A5; word-break: break-all;">-</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Verification Timestamp (UTC)</div>
+              <div id="modal-mod-timestamp" class="font-mono" style="color: var(--text-secondary); font-size: 11.5px;">-</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Overall Hash Comparison Result</div>
+              <div id="modal-mod-overall-status" style="font-weight: 800; font-size: 13px;">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Explanation Summary Narrative Box -->
+        <div style="background: rgba(7, 13, 30, 0.7); border-left: 3px solid var(--accent-blue); padding: 14px 18px; border-radius: 4px; margin-bottom: 20px;">
+          <div style="font-size: 11px; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700; margin-bottom: 4px;">
+            Forensic Modification Explanation & Meaning
+          </div>
+          <div id="modal-mod-explanation" style="font-size: 13px; color: #F1F5F9; line-height: 1.55;">
+            -
+          </div>
+        </div>
+
+        <!-- Detected Modifications Table -->
+        <div style="margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="font-size: 13px; font-weight: 700; color: #FFFFFF;">
+              Detected Modifications (<span id="modal-mod-count">0</span>)
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);">Confirmed differences algorithmically isolated</span>
+          </div>
+          <div class="table-container" style="max-height: 260px; overflow-y: auto;">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th style="width: 15%;">Location</th>
+                  <th style="width: 25%;">Original Value</th>
+                  <th style="width: 25%;">Verification Value</th>
+                  <th style="width: 35%;">Detected Change & Explanation</th>
+                </tr>
+              </thead>
+              <tbody id="modal-mod-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Metadata Discrepancies Table -->
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 13px; font-weight: 700; color: #FFFFFF; margin-bottom: 8px;">
+            Metadata & Attribute Discrepancies
+          </div>
+          <div class="table-container" style="max-height: 180px; overflow-y: auto;">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Attribute</th>
+                  <th>Original Baseline</th>
+                  <th>Verification File</th>
+                  <th>Detected Difference</th>
+                </tr>
+              </thead>
+              <tbody id="modal-mod-meta-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Scope & Analysis Limitations -->
+        <div style="background: rgba(13, 23, 48, 0.4); border: 1px dashed var(--border-color); border-radius: var(--radius-md); padding: 12px 16px;">
+          <div style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">
+            Analysis Limitations & Uncompared Information
+          </div>
+          <ul id="modal-mod-limitations-list" style="margin: 0; padding-left: 18px; font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+            <!-- Populated dynamically -->
+          </ul>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="font-size: 11.5px; color: var(--text-muted);">
+          Linked to Evidence ID & Verification Event
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModificationReportModal()">Close</button>
+          <button type="button" class="btn btn-primary" id="btn-download-mod-pdf" onclick="downloadModificationReportPdf()">
+            <span>⬇ Download Modification Report (PDF)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Scripts -->
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
